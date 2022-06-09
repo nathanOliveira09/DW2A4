@@ -3,6 +3,7 @@ import { FormEvent, useState } from "react";
 import { FeedbackType, feedbackTypes } from "..";
 import { CloseButton } from "../../CloseButton";
 import { ScreenshotButton } from "../ScreenshotButton";
+import api from "../../../../lib/api"
 
 interface FeedbackContentStepProps{
     feedbackType: FeedbackType;
@@ -15,17 +16,34 @@ export function FeedbackContentStep({
     onFeedbackRestartRequested,
     onFeedbackSent,
 }: FeedbackContentStepProps) {
+    const [isSendingFeedback, setIsSendingFeedback] = useState(false)
     const [screenshot, setScreenshot] = useState<string | null>(null)
     const [comment, setComment] = useState('')
+    const [userName, setUserName] = useState('')
+    const [userMail, setUserMail] = useState('')
 
-    const feedbackTypeInfo = feedbackTypes[feedbackType];
+
+    const feedbackTypeInfo = feedbackTypes[feedbackType]
 
     function handleSubmitFeedback(event: FormEvent) {
-        event.preventDefault();
-        console.log({
-            screenshot,
-            comment,
-        })
+        fetch(`http://localhost:3333/feedbacks`,{
+                method: "POST",
+                body: JSON.stringify(
+                    {
+                        "type": `${feedbackTypeInfo.title}`,
+                        "comment": `${comment}`,
+	                    "userName": `${userName}`,
+	                    "userMail": `${userMail}`,
+                    }
+                )
+            
+            }
+        )
+        // event.preventDefault();
+        // console.log({
+        //     screenshot,
+        //     comment,
+        // })
 
         onFeedbackSent();
     }
@@ -39,7 +57,7 @@ export function FeedbackContentStep({
                     onClick={onFeedbackRestartRequested}>
                     <ArrowLeft weight="bold" className="w-4 h-4"/>
                 </button>
-                <span className='text-xl leading-6 flex items-center gap-2'>
+                <span className='text-xl leading-6 flex items-center gap-2 dark:text-zinc-50 text-zinc-900'>
                     <img src={feedbackTypeInfo.image.source} alt={feedbackTypeInfo.image.alt} className="w-6 h-6"/>
                     {feedbackTypeInfo.title}
                 </span>
@@ -47,10 +65,10 @@ export function FeedbackContentStep({
             </header>
             
             <form onSubmit={handleSubmitFeedback} className="my-4 w-full flex flex-col gap-2">
-                <input type="text" placeholder="Informe seu nome" required className="min-w-[304px] w-full min-h-[30px] text-sm placeholder-zinc-400 text-zinc-100 border-zinc-600 bg-transparent rounded-md focus:border-brand-500 focus:ring-brand-500 focus:ring-1 focus:outline-none"/>
-                <input type="email" name="emailUsuario" id="emailUsuario" required placeholder="Informe seu email" className="min-w-[304px] w-full min-h-[30px] text-sm placeholder-zinc-400 text-zinc-100 border-zinc-600 bg-transparent rounded-md focus:border-brand-500 focus:ring-brand-500 focus:ring-1 focus:outline-none"/>
+                <input type="text" placeholder="Informe seu nome" required className="min-w-[304px] w-full min-h-[30px] text-sm dark:{placeholder-zinc-100 text-zinc-50} placeholder-zinc-800 text-zinc-600 border-zinc-600 bg-transparent rounded-md focus:border-brand-500 focus:ring-brand-500 focus:ring-1 focus:outline-none" onChange={event => setUserName(event.target.value)}/>
+                <input type="email" name="emailUsuario" id="emailUsuario" required placeholder="Informe seu email" className="min-w-[304px] w-full min-h-[30px] text-sm dark:{placeholder-zinc-100 text-zinc-50} placeholder-zinc-800 text-zinc-600 border-zinc-600 bg-transparent rounded-md focus:border-brand-500 focus:ring-brand-500 focus:ring-1 focus:outline-none"onChange={event => setUserMail(event.target.value)}/>
                 <textarea 
-                    className="min-w-[304px] w-full min-h-[112px] text-sm placeholder-zinc-400 text-zinc-100 border-zinc-600 bg-transparent rounded-md focus:border-brand-500 focus:ring-brand-500 focus:ring-1 focus:outline-none resize-none scrollbar-thumb-zinc-700 scrollbar-track-transparent scrollbar-thin"
+                    className="min-w-[304px] w-full min-h-[112px] text-sm dark:{placeholder-zinc-100 text-zinc-50} placeholder-zinc-800 text-zinc-600 border-zinc-600 bg-transparent rounded-md focus:border-brand-500 focus:ring-brand-500 focus:ring-1 focus:outline-none resize-none scrollbar-thumb-zinc-700 scrollbar-track-transparent scrollbar-thin"
                     placeholder="Conte com detalhes o que está acontecendo"
                     onChange={event => setComment(event.target.value)}
                 />
